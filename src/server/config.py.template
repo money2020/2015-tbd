@@ -1,0 +1,6 @@
+# Visa Direct configuration
+
+user_id = ''
+password = ''
+client_pem = '../../cert/client.pem'
+private_pem = '../../cert/private.pem'

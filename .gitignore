@@ -1,0 +1,10 @@
+# Sensitive Information
+src/server/config.py
+
+# Certificates
+*.csr
+*.pem
+
+# Clutter
+.DS_Store
+*.pyc

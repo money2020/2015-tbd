@@ -74,7 +74,6 @@ gulp.task('clean:dist', function(cb)
     del(['dist/*'], cb);
 });
 
-
 // Develop
 gulp.task('lint', function()
 {

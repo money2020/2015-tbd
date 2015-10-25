@@ -19,6 +19,12 @@ def peers(peer_id=None):
     return _crud('peer', models.Peer, peer_id)
 
 
+@app.route('/vendors', methods=['GET', 'POST'])
+@app.route('/vendors/<vendor_id>', methods=['GET'])
+def vendors(vendor_id=None):
+    return _crud('vendor', models.Vendor, vendor_id)
+
+
 def _crud(name, model, obj_id):
     return_message = None
 

@@ -6,6 +6,11 @@ peers_groups = db.Table('peers_to_groups',
     db.Column('group_id', db.Integer, db.ForeignKey('groups.id'))
 )
 
+vendors_groups = db.Table('vendors_to_groups',
+    db.Column('vendor_id', db.Integer, db.ForeignKey('vendors.id')),
+    db.Column('group_id', db.Integer, db.ForeignKey('groups.id'))
+)
+
 class SuperModel:
 
     @classmethod
@@ -16,6 +21,10 @@ class SuperModel:
         # ugh...
         if 'peers' in df:
             df['peers'] = [x for x in Peer.query.filter(Peer.id.in_(df['peers'])).all()]
+
+        # UGH...
+        if 'vendor' in df:
+            df['vendor'] = [v for v in Vendor.query.filter(Vendor.id.in_(df['vendor'])).all()]
 
         return cls(**df)
 
@@ -43,6 +52,25 @@ class Peer(db.Model, SuperModel):
         return '<Peer "%r">' % (self.id)
 
 
+class Vendor(db.Model, SuperModel):
+
+    __tablename__ = 'vendors'
+
+    id = db.Column(db.Integer, primary_key=True)
+    image = db.Column(db.String(64))
+    name = db.Column(db.String(64))
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'image': self.image
+        }
+
+    def __repr__(self):
+        return '<Vendor "%r">' % (self.id)
+
+
 class Group(db.Model, SuperModel):
 
     __tablename__ = 'groups'
@@ -50,12 +78,14 @@ class Group(db.Model, SuperModel):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     peers = db.relationship('Peer', secondary=peers_groups)
+    vendor = db.relationship('Vendor', secondary=vendors_groups)
 
     def serialize(self):
         return {
             'id': self.id,
             'name': self.name,
-            'peers': [p.serialize() for p in self.peers]
+            'peers': [p.serialize() for p in self.peers],
+            'vendor': [v.serialize() for v in self.vendor]
         }
 
     def __repr__(self):

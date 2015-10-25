@@ -76,9 +76,6 @@ vendors = [{
     "securenetKey": config.secure_key
 }]
 
-print vendors
-exit()
-
 for peer in peers:
     db.session.add(models.Peer.fromdict(peer))
     db.session.commit()

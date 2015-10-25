@@ -591,6 +591,10 @@ angular
         };
         BunchAPI.groups.list().then(function(groups) {
             groups = groups.map(function(group) {
+                var timestamps = group.cashouts.reduce(function(result, x) {
+                    result[x.peer.id] = x.timestamp;
+                    return result;
+                }, {});
                 var peersWithCashouts = group.cashouts.map(function(cashout) {
                     return cashout.peer.id;
                 });
@@ -599,6 +603,9 @@ angular
                     if (!result.paid) result.paid = [];
                     if (!result.unpaid) result.unpaid = [];
                     var collection = (peersWithCashouts.indexOf(peer.id) != -1) ? result.paid : result.unpaid;
+                    if (timestamps[peer.id]) {
+                        peer.timestamp = timestamps[peer.id];
+                    }
                     collection.push(peer);
                     result.all.push(peer);
                     return result;

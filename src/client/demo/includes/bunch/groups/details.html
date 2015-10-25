@@ -10,7 +10,7 @@
         </div>
 
         <div ng-if="state.group.peers.unpaid.length > 0">
-            <span class="fs-title display-block mb+" style="text-align: center">Time Until Next Payout</span>
+            <span class="fs-title display-block mb+" style="text-align: center">Time Until Next Payout Of {{ state.group.payoutPerInterval | currency:undefined:0 }}</span>
             <div class="timeleft">
                 <div class="card m+ timeleft-card timeleft-months">
                     <span class="number fs-display-1 display-block">{{ state.group.timeLeft.months }}</span>
@@ -66,6 +66,7 @@
                     </div>
                     <div class="list-row__content .peer">
                         <span class="fs-body-2 display-block">{{ peer.businessName }}</span>
+                        <span class="fs-caption display-block" style="float:right;">{{ state.group.payoutPerInterval | currency:undefined:0 }}</span>
                         <span class="fs-caption display-block">{{ peer.ownerName }}</span>
                     </div>
                 </li>

@@ -1,5 +1,7 @@
 # Sensitive Information
 src/server/config.py
+src/server/db_repository
+src/server/app.db
 
 # Certificates
 *.csr

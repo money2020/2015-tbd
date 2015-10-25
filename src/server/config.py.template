@@ -1,6 +1,12 @@
-# Visa Direct configuration
+import os
 
-user_id = ''
-password = ''
-client_pem = '../../cert/client.pem'
-private_pem = '../../cert/private.pem'
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# WorldPay configuration
+securenet_id = ''
+secure_key = ''
+
+# Database configuration
+SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
+SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
+SQLALCHEMY_TRACK_MODIFICATIONS = True

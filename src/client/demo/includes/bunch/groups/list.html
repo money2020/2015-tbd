@@ -15,7 +15,7 @@
         </div>
 
         <div ng-if="state.incompleteGroups.length > 0">
-            <span class="fs-title display-block m+">Active Bunches</span>
+            <span class="fs-title display-block m+">Your Active Bunches</span>
             <div flex-container="row" flex-gutter="24" ng-repeat="group in state.incompleteGroups | filter:state.filters.groups.label">
                 <div flex-item><a ng-href="{{ group.url }}">
                     <div class="card" style="position:relative">
@@ -27,16 +27,15 @@
 
                         <div class="p+" style="text-transform: none;">
                             <span style="text-decoration:none; width: 35px; border-radius: 0; display: inline-block; margin-right: 18px;" class="list-row__primary" ng-repeat="peer in group.peers.unpaid">
-                                <img style="box-sizing: content-box; border:3px solid rgba(255,255,255,0.3); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}">
-                            </span>
-                            <span style="text-decoration:none; width: 35px; border-radius: 0; display: inline-block;  margin-right: 18px;" class="list-row__primary" ng-repeat="peer in group.peers.paid">
-                                <img style="box-sizing: content-box; border:3px solid rgb(127, 207, 127); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}">
+                                <img style="box-sizing: content-box; border:3px solid rgba(255,255,255,0.3); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}" lx-tooltip="{{ peer.ownerName }}" tooltip-position="bottom">
+                            </span><span style="text-decoration:none; width: 35px; border-radius: 0; display: inline-block;  margin-right: 18px;" class="list-row__primary" ng-repeat="peer in group.peers.paid">
+                                <img style="box-sizing: content-box; border:3px solid rgb(127, 207, 127); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}" lx-tooltip="{{ peer.ownerName }} was funded!" tooltip-position="bottom">
                             </span>
                         </div>
 
                         <div class="card__actions" style="text-shadow: 0px 2px 2px rgba(0,0,0,0.4); background: rgba(0,0,0,0.3); position: absolute; top: 0; left: 0; right: 0">
-                            <button style="color:white" class="btn btn--m btn--black btn--flat" lx-ripple>$250 / Person</button>
-                            <button style="float:right" class="btn btn--m btn--orange btn--flat" lx-ripple><span style="font-weight:600">$1000</span> <span style="opacity:0.9; margin-left: 3px;">Payout</span></button>
+                            <button style="color:white" class="btn btn--m btn--black btn--flat" lx-ripple><b style="text-shadow: 0px 2px 2px rgba(0,0,0,0.4);">{{ group.amountPerInterval | currency }} / Month</b></button>
+                            <button style="float:right" class="btn btn--m btn--orange btn--flat" lx-ripple><b style="text-shadow: 0px 2px 2px rgba(0,0,0,0.4);"><span style="font-weight:600">{{ group.payoutPerInterval | currency }}</span> <span style="opacity:0.9; margin-left: 3px;">Payout</span></b></button>
                         </div>
                     </div></a>
                 </div>
@@ -45,7 +44,7 @@
 
 
         <div ng-if="state.completedGroups.length > 0">
-            <span class="fs-title display-block m+ mt++">Funded Bunches</span>
+            <span class="fs-title display-block m+ mt++">Your Funded Bunches</span>
             <div flex-container="row" flex-gutter="24" ng-repeat="group in state.completedGroups | filter:state.filters.groups.label">
                 <div flex-item><a ng-href="{{ group.url }}">
                     <div class="card" style="position:relative">
@@ -57,16 +56,15 @@
 
                         <div class="p+" style="text-transform: none;">
                             <span style="text-decoration:none; width: 35px; border-radius: 0; display: inline-block; margin-right: 18px;" class="list-row__primary" ng-repeat="peer in group.peers.unpaid">
-                                <img style="box-sizing: content-box; border:3px solid rgba(255,255,255,0.3); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}">
-                            </span>
-                            <span style="text-decoration:none; width: 35px; border-radius: 0; display: inline-block; margin-right: 18px;" class="list-row__primary" ng-repeat="peer in group.peers.paid">
-                                <img style="box-sizing: content-box; border:3px solid rgb(127, 207, 127); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}">
+                                <img style="box-sizing: content-box; border:3px solid rgba(255,255,255,0.3); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}" lx-tooltip="{{ peer.ownerName }}" tooltip-position="bottom">
+                            </span><span style="text-decoration:none; width: 35px; border-radius: 0; display: inline-block;  margin-right: 18px;" class="list-row__primary" ng-repeat="peer in group.peers.paid">
+                                <img style="box-sizing: content-box; border:3px solid rgb(127, 207, 127); box-shadow: 0px 2px 2px rgba(0,0,0,0.2);" class="img-round" ng-src="{{ peer.image }}" lx-tooltip="{{ peer.ownerName }} was funded!" tooltip-position="bottom">
                             </span>
                         </div>
 
                         <div class="card__actions" style="text-shadow: 0px 2px 2px rgba(0,0,0,0.4); background: rgba(0,0,0,0.3); position: absolute; top: 0; left: 0; right: 0">
-                            <button style="color:white" class="btn btn--m btn--black btn--flat" lx-ripple>$250 / Person</button>
-                            <button style="float:right" class="btn btn--m btn--orange btn--flat" lx-ripple><span style="font-weight:600">$1000</span> <span style="opacity:0.9; margin-left: 3px;">Payout</span></button>
+                            <button style="color:white" class="btn btn--m btn--black btn--flat" lx-ripple><b style="text-shadow: 0px 2px 2px rgba(0,0,0,0.4);">{{ group.amountPerInterval | currency }} / Month</b></button>
+                            <button style="float:right" class="btn btn--m btn--orange btn--flat" lx-ripple><b style="text-shadow: 0px 2px 2px rgba(0,0,0,0.4);"><span style="font-weight:600">{{ group.payoutPerInterval | currency }}</span> <span style="opacity:0.9; margin-left: 3px;">Payout</span></b></button>
                         </div>
                     </div></a>
                 </div>

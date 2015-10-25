@@ -1,4 +1,5 @@
 from app import db, worldpay
+from dateutil.relativedelta import relativedelta
 
 import datetime
 
@@ -51,7 +52,6 @@ class Peer(db.Model, SuperModel):
     businessName = db.Column(db.String(64))
     ownerName = db.Column(db.String(64))
     image = db.Column(db.String(64))
-    paid = db.Column(db.Boolean) # DEPRECATED
     groups = db.relationship('Group', secondary=peers_groups)
     payments = db.relationship('Payment', backref="peer_orig")
     cashouts = db.relationship('Cashout', backref="peer_orig")
@@ -61,8 +61,7 @@ class Peer(db.Model, SuperModel):
             'id': self.id,
             'businessName': self.businessName,
             'ownerName': self.ownerName,
-            'image': self.image,
-            'paid': self.paid
+            'image': self.image
         }
 
         if deep_link > 0:
@@ -81,6 +80,8 @@ class Vendor(db.Model, SuperModel):
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.String(64))
     name = db.Column(db.String(64))
+    securenetId = db.Column(db.String(64))
+    securenetKey = db.Column(db.String(64))
 
     def serialize(self, deep_link=2):
         serialize = {
@@ -109,7 +110,7 @@ class Group(db.Model, SuperModel):
     peers = db.relationship('Peer', secondary=peers_groups)
     vendor = db.relationship('Vendor', secondary=vendors_groups)
     payments = db.relationship('Payment', backref="group_orig")
-    cashouts = db.relationship('Cashout', backref="group_orig")
+    cashouts = db.relationship('Cashout', backref="group_orig", lazy='dynamic')
 
     def serialize(self, deep_link=2):
         serialize =  {
@@ -117,6 +118,7 @@ class Group(db.Model, SuperModel):
             'name': self.name,
             'amountPerInterval': self.amountPerInterval,
             'payoutPerInterval': self.payoutPerInterval,
+            'nextTimestamp': self._next_cashout().strftime("%s")
         }
 
         if deep_link > 0:
@@ -126,6 +128,9 @@ class Group(db.Model, SuperModel):
             serialize['cashouts'] = [c.serialize(deep_link - 1) for c in self.cashouts]
 
         return serialize
+
+    def _next_cashout(self):
+        return self.cashouts.order_by('-id').first().timestamp + relativedelta(months=1)
 
     def __repr__(self):
         return '<Group "%r">' % (self.name)
@@ -150,9 +155,15 @@ class Payment(db.Model, SuperModel):
             'group': group.id
         }
 
-        wp_request = {}
+        wp_request = {
+            'amount': payment['amount'],
+            'firstName': peer.ownerName,
+            'lastName': peer.businessName
+        }
+
+        auth = (group.vendor[0].securenetId, group.vendor[0].securenetKey) # TODO: Clean this up
         
-        if worldpay.collect_payment(wp_request):
+        if worldpay.collect_payment(wp_request, auth):
             payment = cls(**payment)
 
             db.session.add(payment)
@@ -197,15 +208,12 @@ class Cashout(db.Model, SuperModel):
             'group': group.id
         }
 
-        wp_request = {}
+        cashout = cls(**cashout)
 
-        if worldpay.distribute_payment(wp_request):
-            cashout = cls(**cashout)
+        db.session.add(cashout)
+        db.session.commit()
 
-            db.session.add(cashout)
-            db.session.commit()
-
-            return cashout
+        return cashout
 
     def serialize(self, deep_link=2):
         serialize = {

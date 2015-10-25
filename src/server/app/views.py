@@ -57,8 +57,8 @@ def cycle():
 
         cashouts.append(models.Cashout.distribute(group, peer))
 
-    return jsonify({'payments': [p.serialize() for p in payments],
-                    'cashouts': [c.serialize() for c in cashouts]})
+    return jsonify({'payments': [p.serialize() for p in payments if p is not None],
+                    'cashouts': [c.serialize() for c in cashouts if c is not None]})
 
 def _crud(name, model, obj_id):
     return_message = None

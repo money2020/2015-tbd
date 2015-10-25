@@ -10,19 +10,38 @@ class WorldPay:
         self.secure_key = secure_key
 
 
-    def collect_payment(self, data):
-        return True
+    def collect_payment(self, data, auth):
+
+        body = '''{
+            amount: %0.2f,
+            check: {
+                firstName: "%s",
+                lastName: "%s",
+                routingNumber: 222371863,
+                accountNumber: 123456
+            },
+            developerApplication: {
+                developerId: 12345678,
+                version: '1.2'
+            }
+        }''' % (data['amount'], data['firstName'], data['lastName'])
+
+        print body
+
+        r = self._request('/Payments/Charge', body=body, auth=auth)
+
+        print r.content
 
 
-    def distribute_payment(self, data):
-        return True
-
-
-    def _request(self, endpoint, body):
+    def _request(self, endpoint, body, auth=None):
         url = self.base_url + endpoint
+
+        if auth is None:
+            auth = (self.securenet_id, self.secure_key)
+
         r = requests.post(url,
                 headers=self.headers,
-                auth=(self.securenet_id, self.secure_key),                
+                auth=auth,
                 data=body)
 
         return r
@@ -30,33 +49,23 @@ class WorldPay:
 
 if __name__ == '__main__':
     body = '''{
-  amount: 11.00,
-  card: {
-    number: '4444 3333 2222 1111',
-    cvv: '999',
-    expirationDate: '04/2016',
-    address: {
-      line1: '123 Main St.',
-      city: 'Austin',
-      state: 'TX',
-      zip: '78759'
-    },
-    firstname: 'Jack',
-    lastname: 'Test'
+  amount: 10.00,
+  check: {
+    firstName: REPLACE_ME,
+    lastName: REPLACE_ME,
+    routingNumber: 222371863,
+    accountNumber: 123456
   },
-  extendedInformation: {
-    typeOfGoods: 'PHYSICAL'
-  },
-  developerApplication: {
-    developerId: 12345678,
-    version: '1.2'
-  }
+   developerApplication: {
+     developerId:12345678,
+     version:'1.2'
+   }
 }'''
 
     import config
 
     w = WorldPay(config.securenet_id, config.secure_key)
-    r = w._request('/Payments/Authorize', body)
+    r = w._request('/Payments/Charge', body)
 
     print r.status_code
     print r.content

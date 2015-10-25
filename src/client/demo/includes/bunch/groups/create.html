@@ -1,45 +1,60 @@
 
 <div class="main-section">
     <div class="main-section__content">
+        <div class="example__content pt0">
 
-        <div flex-container="row mt-">
-            <div flex-item>
-                <lx-text-field label="Group Name">
-                    <input type="text" ng-model="state.params.groupName">
-                </lx-text-field>
-            </div>
-        </div>
-
-        <div class="card p+ mt+" flex-item>
-            <lx-select style="padding-top:10px" ng-model="state.params.peers" placeholder="Invite Peers" choices="state.users" multiple floating-label>
-                <lx-select-selected>
-                    {{ $selected.ownerName }} - {{ $selected.businessName }}
-                </lx-select-selected>
-                <lx-select-choices>
-                    {{ $choice.ownerName }}
-                </lx-select-choices>
-            </lx-select>
-        </div>
-
-        <div class="card group-params p+ mt+" ng-if="state.params.peers.length > 0">
-            <div flex-container="row" flex-gutter="24">
+            <div flex-container="row">
                 <div flex-item>
-                    <lx-text-field label="Payout Per Month ($)">
-                        <input type="number" ng-change="change('payout', state.params.payoutPerInterval)" ng-model="state.params.payoutPerInterval" ng-model-options="{debounce:200}">
-                    </lx-text-field>
-                </div>
-                <div flex-item>
-                    <lx-text-field label="Amount To Pay Per Month ($)">
-                        <input type="number" ng-change="change('amount', state.params.amountPerInterval)" ng-model="state.params.amountPerInterval" ng-model-options="{debounce:200}">
-                    </lx-text-field>
-                </div>
-                <div flex-item>
-                    <lx-text-field label="Number Of Peers" disabled="true">
-                        <input type="number" ng-model="state.params.peers.length" ng-disabled="true">
+                    <lx-text-field label="Group Name">
+                        <input type="text" ng-model="state.params.groupName">
                     </lx-text-field>
                 </div>
             </div>
+
+            <div flex-container="row">
+                <div class="p+" flex-item>
+                    <lx-select style="padding-top:10px" ng-model="state.params.peers" placeholder="Invite Peers" choices="state.users" multiple floating-label>
+                        <lx-select-selected>
+                            {{ $selected.ownerName }} - {{ $selected.businessName }}
+                        </lx-select-selected>
+                        <lx-select-choices>
+                            {{ $choice.ownerName }}
+                        </lx-select-choices>
+                    </lx-select>
+                </div>
+            </div>
+
+            <div class="p+" flex-item>
+                <lx-select style="padding-top:10px"  ng-model="state.params.vendor" placeholder="Vendor" choices="state.vendors" floating-label>
+                    <lx-select-selected>
+                        {{ $selected.name }}
+                    </lx-select-selected>
+                    <lx-select-choices>
+                        {{ $choice.name }}
+                    </lx-select-choices>
+                </lx-select>
+            </div>
+
+            <div class="card group-params p+ mt+" ng-if="state.params.peers.length > 0">
+                <div flex-container="row" flex-gutter="24">
+                    <div flex-item>
+                        <lx-text-field label="Payout Per Month ($)">
+                            <input type="number" ng-change="change('payout', state.params.payoutPerInterval)" ng-model="state.params.payoutPerInterval" ng-model-options="{debounce:200}">
+                        </lx-text-field>
+                    </div>
+                    <div flex-item>
+                        <lx-text-field label="Amount To Pay Per Month ($)">
+                            <input type="number" ng-change="change('amount', state.params.amountPerInterval)" ng-model="state.params.amountPerInterval" ng-model-options="{debounce:200}">
+                        </lx-text-field>
+                    </div>
+                    <div flex-item>
+                        <lx-text-field label="Number Of Peers" disabled="true">
+                            <input type="number" ng-model="state.params.peers.length" ng-disabled="true">
+                        </lx-text-field>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn--m btn--blue btn--raised mt+++" ng-click="create()" lx-ripple>Submit</button>
         </div>
-        <button class="btn btn--m btn--blue btn--raised mt+++" ng-click="create()" lx-ripple>Submit</button>
     </div>
 </div>

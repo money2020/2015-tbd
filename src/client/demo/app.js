@@ -13,7 +13,7 @@ humanizer.languages.shortEn = {
   h: function(x) { return x + "h"}
 };
 
-var API_HOST = "http://b64cd8cf.ngrok.io"
+var API_HOST = "http://localhost:5000"
 
 // Lol free globals in my angular? We dont play by the rules
 var BUNCH_ROUTES = {
@@ -580,14 +580,29 @@ angular
         };
         BunchAPI.groups.list().then(function(groups) {
             groups = groups.map(function(group) {
+                var peersWithCashouts = group.cashouts.map(function(cashout) {
+                    return cashout.peer.id;
+                });
+                group.peers = group.peers.reduce(function(result, peer) {
+                    if (!result.all) result.all = [];
+                    if (!result.paid) result.paid = [];
+                    if (!result.unpaid) result.unpaid = [];
+                    var collection = (peersWithCashouts.indexOf(peer.id) != -1) ? result.paid : result.unpaid;
+                    collection.push(peer);
+                    result.all.push(peer);
+                    return result;
+                }, {});
                 group.url = "/bunch/groups/" + group.id;
+                group.completed = (group.peers.unpaid.length == 0);
                 return group;
             });
             $scope.state.loading = false;
             $scope.state.groups = groups;
+            $scope.state.completedGroups = groups.filter(function(x) { return x.completed; });
+            $scope.state.incompleteGroups = groups.filter(function(x) { return !x.completed; });
         });
     })
-    .controller('BunchGroupCreate', function($scope, $location, TestGroup, BunchAPI) {
+    .controller('BunchGroupCreate', function($scope, $q, $location, TestGroup, BunchAPI) {
         $scope.state = {
             params: {
                 groupName: 'New Group'
@@ -598,8 +613,12 @@ angular
         ,   lastChanged: null
         };
 
-        BunchAPI.users.list().then(function(users) {
-            $scope.state.users = users;
+        $q.all([
+            BunchAPI.users.list()
+        ,   BunchAPI.vendors.list()
+        ]).then(function(results) {
+            $scope.state.users = results[0];
+            $scope.state.vendors = results[1];
         });
 
         $scope.create = function() {
@@ -611,7 +630,7 @@ angular
 
             var groupModel = {
                 name: $scope.state.params.groupName
-            ,   vendor: [1]
+            ,   vendor: [$scope.state.params.vendor.id]
             ,   payoutPerInterval: parseInt($scope.state.params.payoutPerInterval)
             ,   amountPerInterval: parseInt($scope.state.params.amountPerInterval)
             ,   peers: $scope.state.params.peers.map(function(peer) {
@@ -860,6 +879,27 @@ angular
         });
 
         return {
+            vendors: {
+                list: function() {
+                    if (!TEST_MODE) {
+                        return $http.get(API_HOST + "/vendors").then(function(result) {
+                            return result.data;
+                        });
+                    }
+                    return $q.when([
+                        {
+                          "id": 1,
+                          "image": "/images/placeholder/1-square.jpg",
+                          "name": "John Deere"
+                        },
+                        {
+                          "id": 2,
+                          "image": "/images/placeholder/1-square.jpg",
+                          "name": "Dodge Ram"
+                        }
+                    ])
+                }
+            },
             users: {
                 create: function(user) {
                 },

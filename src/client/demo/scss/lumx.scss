@@ -28,6 +28,25 @@
     @include align-content(center);
 }
 
+body,html {
+    background-color: #E8EAEB;
+    height: 100%;
+}
+
+header {
+    background-color: #2196F3 !important;
+}
+
+.lx-select__tag {
+    padding: 3px 10px;
+    background: #2196F3;
+    border-radius: 20px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 5px;
+    color: white;
+}
+
 .timeleft-card {
     @include flex(1 1 auto);
     @include align-self(stretch);

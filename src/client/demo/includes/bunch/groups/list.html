@@ -3,9 +3,10 @@
     <div class="main-section__content">
 
         <div class="toolbar">
-            <span class="toolbar__label fs-title">My Bunches</span>
-            <div class="toolbar__right">
+            <div class="toolbar__left">
                 <lx-search-filter closed theme="light" model="state.filters.groups.label"></lx-search-filter>
+            </div>
+            <div class="toolbar__right" style="float: right">
                 <button class="btn btn--m btn--blue btn--flat" lx-ripple
                 ng-click="actions.groups.create()">
                     Create Group
@@ -14,18 +15,47 @@
         </div>
 
         <div class="card">
+            <span class="fs-title display-block m+">Active Bunches</span>
             <ul class="list">
                 <li style="cursor:pointer;" class="list-row list-row--has-separator"
-                    ng-repeat="group in state.groups | filter:state.filters.groups.label"
+                    ng-repeat="group in state.incompleteGroups | filter:state.filters.groups.label"
                     ng-click="actions.groups.details(group)">
                     <div class="list-row__primary">
-                        <img ng-src="{{ group.image }}" width="40" height="40" class="img-round">
+                        <img ng-src="{{ group.vendor[0].image }}" width="40" height="40" class="img-round">
                     </div>
                     <div class="list-row__content">
-                        <span>{{ group.name }}</span>
+                        <span class="group-name">{{ group.name }}</span>
+                        <span class="group-vendor">{{ group.vendor[0].name }}</span>
                     </div>
-                    <div class="list-row__secondary">
+                    <div class="list-row__secondary" ng-if="group.peers.unpaid.length != 0">
                         <i class="icon icon--s icon--grey icon--flat mdi mdi-chevron-right"></i>
+                    </div>
+                    <div class="list-row__secondary" ng-if="group.peers.unpaid.length == 0">
+                        <i class="icon icon--s icon--grey icon--flat mdi mdi-done"></i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="card mt+">
+            <span class="fs-title display-block m+">Completed Bunches</span>
+            <ul class="list">
+                <li style="cursor:pointer;" class="list-row list-row--has-separator"
+                    ng-repeat="group in state.completedGroups"
+                    ng-click="actions.groups.details(group)">
+                    <div class="list-row__primary">
+                        <img ng-src="{{ group.vendor[0].image }}" width="40" height="40" class="img-round">
+                    </div>
+                    <div class="list-row__content">
+                        <span class="group-name">{{ group.name }}</span>
+                        <span class="group-vendor">{{ group.vendor[0].name }}</span>
+                    </div>
+                    <div class="list-row__secondary" ng-if="group.peers.unpaid.length != 0">
+                        <i class="icon icon--s icon--grey icon--flat mdi mdi-chevron-right"></i>
+                    </div>
+                    <div class="list-row__secondary" ng-if="group.peers.unpaid.length == 0">
+                        <i class="icon icon--s icon--grey icon--flat mdi mdi-done"></i>
                     </div>
                 </li>
             </ul>

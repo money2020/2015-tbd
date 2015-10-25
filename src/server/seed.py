@@ -42,36 +42,42 @@ peers = [{
 vendors = [{
     "name": "John Deere",
     "image": "/images/bunch/vendor-john-deere.jpg",
+    "logoImage": "/images/bunch/vendor-logo-john-deere.gif",
     "securenetId": config.securenet_id,
     "securenetKey": config.secure_key
 },
 {
     "name": "Caterpillar",
     "image": "/images/bunch/vendor-caterpillar.jpg",
+    "logoImage": "/images/bunch/vendor-logo-caterpillar.jpg",
     "securenetId": config.securenet_id,
     "securenetKey": config.secure_key
 },
 {
     "name": "Mitsubishi Heavy Industries",
     "image": "/images/bunch/vendor-mitsubishi-heavy-industries.jpg",
+    "logoImage": "/images/bunch/vendor-logo-mitsubishi-heavy-industries.jpg",
     "securenetId": config.securenet_id,
     "securenetKey": config.secure_key
 },
 {
     "name": "Cuisinart",
     "image": "/images/bunch/vendor-cuisinart.jpg",
+    "logoImage": "/images/bunch/vendor-logo-cuisinart.jpg",
     "securenetId": config.securenet_id,
     "securenetKey": config.secure_key
 },
 {
     "name": "KitchenAid",
     "image": "/images/bunch/vendor-kitchenaid.jpg",
+    "logoImage": "/images/bunch/vendor-logo-kitchenaid.png",
     "securenetId": config.securenet_id,
     "securenetKey": config.secure_key
 },
 {
     "name": "Viking",
     "image": "/images/bunch/vendor-viking.jpg",
+    "logoImage": "/images/bunch/vendor-logo-viking.png",
     "securenetId": config.securenet_id,
     "securenetKey": config.secure_key
 }]

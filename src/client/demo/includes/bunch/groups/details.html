@@ -7,11 +7,10 @@
                 <img ng-src="{{ state.group.image }}" width="40" height="40" class="img-round">
             </span>
             <span style="display: inline-block" class="fs-display-1 display-block mb+">{{ state.group.name }}</span>
-            <button style="display:inline-block; position:absolute; right:0px" class="btn btn--m btn--blue btn--flat m+" ng-click="cycle()" lx-ripple>Fast Forward</button>
         </div>
 
         <div ng-if="state.group.peers.unpaid.length > 0">
-            <span class="fs-title display-block mb+">Next Payout In</span>
+            <span class="fs-title display-block mb+">Next Payout In:</span>
             <div class="timeleft">
                 <div class="card m+ timeleft-card timeleft-months">
                     <span class="number fs-display-1 display-block">{{ state.group.timeLeft.months }}</span>
@@ -36,7 +35,7 @@
         </span>
 
         <div class="card mt++" ng-if="state.group.peers.unpaid.length > 0">
-            <span class="fs-title display-block m+">Unpaid Peers</span>
+            <span class="fs-title display-block m+">Unfunded Peers</span>
             <div class="divider divider--dark"></div>
             <ul class="list">
                 <li class="list-row list-row--has-separator"
@@ -53,7 +52,7 @@
         </div>
 
         <div class="card mt++" ng-if="state.group.peers.paid.length > 0">
-            <span class="fs-title display-block m+">Paid-out Peers</span>
+            <span class="fs-title display-block m+">Funded Peers</span>
             <div class="divider divider--dark"></div>
             <ul class="list">
                 <li class="list-row list-row--has-separator"

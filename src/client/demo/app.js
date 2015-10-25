@@ -698,6 +698,11 @@ angular
         });
 
     })
+    .filter('reverse', function() {
+      return function(items) {
+        return items.slice().reverse();
+      };
+    })
     .controller('BunchGroupDetails', function($q, $rootScope, $scope, $timeout, $routeParams, $location, Utils, LxNotificationService, DatetimeUtils, BunchAPI) {
         $scope.state = {group: null, loading: true};
 

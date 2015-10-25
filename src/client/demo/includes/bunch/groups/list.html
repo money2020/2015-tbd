@@ -33,7 +33,7 @@
 
         <div ng-if="state.completedGroups.length > 0">
             <span class="fs-title display-block m+ mt++">Funded Bunches</span>
-            <div flex-container="row" flex-gutter="24" ng-repeat="group in state.completedGroups | filter:state.filters.groups.label">
+            <div flex-container="row" flex-gutter="24" ng-repeat="group in state.completedGroups | reverse">
                 <div flex-item><a ng-href="{{ group.url }}">
                     <div class="card" style="position:relative; background-color: #2ED44A;">
 

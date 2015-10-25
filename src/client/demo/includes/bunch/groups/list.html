@@ -19,7 +19,7 @@
                     ng-repeat="group in state.groups | filter:state.filters.groups.label"
                     ng-click="actions.groups.details(group)">
                     <div class="list-row__primary">
-                        <img ng-src="{{ group.vendor.image }}" width="40" height="40" class="img-round">
+                        <img ng-src="{{ group.image }}" width="40" height="40" class="img-round">
                     </div>
                     <div class="list-row__content">
                         <span>{{ group.name }}</span>

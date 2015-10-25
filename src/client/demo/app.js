@@ -3,7 +3,7 @@
 /* global console */
 'use strict'; // jshint ignore:line
 
-var TEST_MODE = true;
+var TEST_MODE = false;
 
 var humanizer = humanizeDuration.humanizer();
 humanizer.languages.shortEn = {
@@ -639,14 +639,12 @@ angular
         }
 
         $scope.$watch('state.params.amountPerInterval', function(amountPerInterval) {
-            console.log("Amount changed:", amountPerInterval);
             if (amountPerInterval == null) {
                 $scope.state.params.payoutPerInterval = null;
                 return;
             }
             $scope.state.lastPressed = 'amount';
             var value = $scope.state.params.peers.length * amountPerInterval;
-            console.log("Amount:", value, $scope.state.params.peers.length, amountPerInterval);
             if (Number.isNaN(value)) return;
             if ($scope.state.lastChanged == 'payout') return;
             $scope.state.params.payoutPerInterval = parseFloat(value.toFixed(2));
@@ -737,15 +735,18 @@ angular
             var peersWithCashouts = group.cashouts.map(function(cashout) {
                 return cashout.peer.id;
             });
+            console.log("Peers with cashouts:", peersWithCashouts);
             group.peers = group.peers.reduce(function(result, peer) {
                 if (!result.all) result.all = [];
                 if (!result.paid) result.paid = [];
                 if (!result.unpaid) result.unpaid = [];
-                var collection = (peersWithCashouts.indexOf(peer.id) != -1 ) ? result.paid : result.unpaid;
+                console.log(peersWithCashouts.indexOf(peer.id), peer.id, peersWithCashouts)
+                var collection = (peersWithCashouts.indexOf(peer.id) != -1) ? result.paid : result.unpaid;
                 collection.push(peer);
                 result.all.push(peer);
                 return result;
             }, {});
+            console.log(group.peers);
 
             return group;
         }
@@ -756,6 +757,11 @@ angular
             .then(function(group) {
                 $scope.state.group = group;
                 $scope.state.loading = false;
+                try {
+                    $scope.$apply()
+                } catch(error) {
+                    console.error("lol")
+                }
             });
         }
         refresh();

@@ -2,38 +2,42 @@
 <div class="main-section">
     <div class="main-section__content">
 
-        <button class="btn btn--m btn--blue btn--raised mt+++" ng-click="cycle()" lx-ripple>Initiate Cycle</button>
-
         <div>
             <span style="display: inline-block; position:relative; top:6px" class="list-row__primary">
-                <img ng-src="{{ state.group.vendor.image }}" width="40" height="40" class="img-round">
+                <img ng-src="{{ state.group.image }}" width="40" height="40" class="img-round">
             </span>
             <span style="display: inline-block" class="fs-display-1 display-block mb+">{{ state.group.name }}</span>
+            <button style="display:inline-block; float:right;" class="btn btn--m btn--blue btn--flat m+" ng-click="cycle()" lx-ripple>Fast Forward</button>
         </div>
 
-        <div class="group-info">
-
-        </div>
-
-        <span class="fs-title display-block mb+">Next Payout In</span>
-
-        <div class="timeleft">
-            <div class="card m+ timeleft-card timeleft-months">
-                <span class="number fs-display-1 display-block">{{ state.group.timeLeft.months }}</span>
-                <span class="label fs-caption display-block" ng-if="state.group.timeLeft.months != 1">Months</span>
-                <span class="label fs-caption display-block" ng-if="state.group.timeLeft.months == 1">Month</span>
-            </div>
-            <div class="card m+ timeleft-card timeleft-weeks">
-                <span class="number fs-display-1 display-block">{{ state.group.timeLeft.weeks }}</span>
-                <span class="label fs-caption display-block" ng-if="state.group.timeLeft.weeks != 1">Weeks</span>
-                <span class="label fs-caption display-block" ng-if="state.group.timeLeft.weeks == 1">Week</span>
-            </div>
-            <div class="card m+ timeleft-card timeleft-days">
-                <span class="number fs-display-1 display-block">{{ state.group.timeLeft.days }}</span>
-                <span class="label fs-caption display-block" ng-if="state.group.timeLeft.days != 1">Days</span>
-                <span class="label fs-caption display-block" ng-if="state.group.timeLeft.days == 1">Day</span>
+        <div ng-if="state.group.peers.unpaid.length > 0">
+            <span class="fs-title display-block mb+">Next Payout In</span>
+            <div class="timeleft">
+                <div class="card m+ timeleft-card timeleft-months">
+                    <span class="number fs-display-1 display-block">{{ state.group.timeLeft.months }}</span>
+                    <span class="label fs-caption display-block" ng-if="state.group.timeLeft.months != 1">Months</span>
+                    <span class="label fs-caption display-block" ng-if="state.group.timeLeft.months == 1">Month</span>
+                </div>
+                <div class="card m+ timeleft-card timeleft-weeks">
+                    <span class="number fs-display-1 display-block">{{ state.group.timeLeft.weeks }}</span>
+                    <span class="label fs-caption display-block" ng-if="state.group.timeLeft.weeks != 1">Weeks</span>
+                    <span class="label fs-caption display-block" ng-if="state.group.timeLeft.weeks == 1">Week</span>
+                </div>
+                <div class="card m+ timeleft-card timeleft-days">
+                    <span class="number fs-display-1 display-block">{{ state.group.timeLeft.days }}</span>
+                    <span class="label fs-caption display-block" ng-if="state.group.timeLeft.days != 1">Days</span>
+                    <span class="label fs-caption display-block" ng-if="state.group.timeLeft.days == 1">Day</span>
+                </div>
             </div>
         </div>
+
+        <span ng-if="state.group.peers.unpaid.length == 0" class="fs-title display-block mb+">
+            All participants have been paid out!
+        </span>
+
+        <span class="fs-title display-block mb+">
+
+        </span>
 
         <style>
         .peer {
@@ -42,7 +46,7 @@
         }
         </style>
 
-        <div class="card mt++">
+        <div class="card mt++" ng-if="state.group.peers.unpaid.length > 0">
             <span class="fs-title display-block m+">Unpaid Peers</span>
             <div class="divider divider--dark"></div>
             <ul class="list">

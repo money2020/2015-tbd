@@ -109,6 +109,7 @@ class Group(db.Model, SuperModel):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
+    image = db.Column(db.String(64))
     amountPerInterval = db.Column(db.Integer)
     payoutPerInterval = db.Column(db.Integer)
     peers = db.relationship('Peer', secondary=peers_groups)
@@ -120,6 +121,7 @@ class Group(db.Model, SuperModel):
         serialize =  {
             'id': self.id,
             'name': self.name,
+            # 'image': self.image,
             'amountPerInterval': self.amountPerInterval,
             'payoutPerInterval': self.payoutPerInterval,
             'nextTimestamp': self._next_cashout().isoformat()

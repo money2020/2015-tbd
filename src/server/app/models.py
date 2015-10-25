@@ -55,7 +55,7 @@ class Peer(db.Model, SuperModel):
     id = db.Column(db.Integer, primary_key=True)
     businessName = db.Column(db.String(64))
     ownerName = db.Column(db.String(64))
-    image = db.Column(db.String(64))
+    image = db.Column(db.String(256))
     groups = db.relationship('Group', secondary=peers_groups)
     payments = db.relationship('Payment', backref="peer_orig")
     cashouts = db.relationship('Cashout', backref="peer_orig")
@@ -82,7 +82,7 @@ class Vendor(db.Model, SuperModel):
     __tablename__ = 'vendors'
 
     id = db.Column(db.Integer, primary_key=True)
-    image = db.Column(db.String(64))
+    image = db.Column(db.String(256))
     name = db.Column(db.String(64))
     securenetId = db.Column(db.String(64))
     securenetKey = db.Column(db.String(64))
@@ -109,7 +109,7 @@ class Group(db.Model, SuperModel):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
-    # image = db.Column(db.String(64))
+    image = db.Column(db.String(256))
     amountPerInterval = db.Column(db.Integer)
     payoutPerInterval = db.Column(db.Integer)
     peers = db.relationship('Peer', secondary=peers_groups)
@@ -143,7 +143,7 @@ class Group(db.Model, SuperModel):
         if cashout:
             base_time = cashout.timestamp
 
-        return base_time + relativedelta(months=1)
+        return base_time + relativedelta(days=28)
 
     def __repr__(self):
         return '<Group "%r">' % (self.name)
@@ -175,7 +175,7 @@ class Payment(db.Model, SuperModel):
         }
 
         auth = (group.vendor[0].securenetId, group.vendor[0].securenetKey) # TODO: Clean this up
-        
+
         if worldpay.collect_payment(wp_request, auth):
             payment = cls(**payment)
 

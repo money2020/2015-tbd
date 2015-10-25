@@ -2,6 +2,7 @@
 src/server/config.py
 src/server/db_repository
 src/server/app.db
+src/server/seed.sh
 
 # Certificates
 *.csr

@@ -2,18 +2,6 @@
 <div class="main-section">
     <div class="main-section__content">
 
-        <div class="toolbar">
-            <div class="toolbar__left">
-                <lx-search-filter closed theme="light" model="state.filters.groups.label"></lx-search-filter>
-            </div>
-            <div class="toolbar__right" style="float: right; position: absolute; right: 10px; ">
-                <button class="btn btn--m btn--blue btn--flat" lx-ripple
-                ng-click="actions.groups.create()">
-                    New Bunch
-                </button>
-            </div>
-        </div>
-
         <div ng-if="state.incompleteGroups.length > 0">
             <span class="fs-title display-block m+">Active Bunches</span>
             <div flex-container="row" flex-gutter="24" ng-repeat="group in state.incompleteGroups | filter:state.filters.groups.label">

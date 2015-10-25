@@ -178,6 +178,10 @@ angular
             return $location.path() === '/';
         };
 
+        $scope.isOnGroupList = function() {
+            return $location.path() === "/bunch/groups" || $location.path === "/bunch/groups/";
+        }
+
         $scope.isOnGroupDetails = function() {
             return /\/bunch\/groups\/\d+/.test($location.path());
         };
@@ -566,7 +570,7 @@ angular
 
 angular
     .module('Bunch', [])
-    .controller('BunchGroupList', function($scope, $location, BunchAPI) {
+    .controller('BunchGroupList', function($scope, $rootScope, $location, BunchAPI) {
         $scope.state = {
             loading: true
         ,   filters: {}
@@ -581,6 +585,9 @@ angular
                     $location.path(group.url);
                 }
             }
+        };
+        $rootScope.groupCreate = function() {
+            $scope.actions.groups.create();
         };
         BunchAPI.groups.list().then(function(groups) {
             groups = groups.map(function(group) {

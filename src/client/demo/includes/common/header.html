@@ -33,5 +33,10 @@
                 <i class="mdi mdi-calendar-clock"></i>
             </button>
         </lx-dropdown>
+        <lx-dropdown position="right" from-top ng-if="isOnGroupList()" ng-click="groupCreate()">
+            <button class="btn btn--m btn--white btn--raised" lx-ripple="black" ng-click="cycle()">
+                <i class="mdi mdi-plus"></i>
+            </button>
+        </lx-dropdown>
     </nav>
 </header>

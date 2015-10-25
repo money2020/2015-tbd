@@ -10,46 +10,35 @@ def index():
 @app.route('/groups', methods=['GET', 'POST'])
 @app.route('/groups/<group_id>', methods=['GET'])
 def groups(group_id=None):
-    if request.method == 'POST':
-
-        group = models.Group(**request.get_json())
-
-        db.session.add(group)
-        db.session.commit()
-
-        group_id = group.id
-
-    if group_id is not None:
-        group = models.Group.query.get(int(group_id))
-        if group is not None:
-            return jsonify(group.serialize())
-
-    else:
-        groups = models.Group.query.all()
-        return jsonify({'groups': [g.serialize() for g in groups]})
-
-    return jsonify({'error': 'not ok'})
+    return _crud('group', models.Group, group_id)
 
 
 @app.route('/peers', methods=['GET', 'POST'])
 @app.route('/peers/<peer_id>', methods=['GET'])
 def peers(peer_id=None):
+    return _crud('peer', models.Peer, peer_id)
+
+
+def _crud(name, model, obj_id):
+    return_message = None
+
     if request.method == 'POST':
+        obj = model(**request.get_json())
 
-        peer = models.Peer(**request.get_json())
-
-        db.session.add(peer)
+        db.session.add(obj)
         db.session.commit()
 
-        peer_id = peer.id
+        obj_id = obj.id
 
-    if peer_id is not None:
-        peer = models.Peer.query.get(int(peer_id))
-        if peer is not None:
-            return jsonify(peer.serialize())
+    if obj_id is not None:
+        obj = model.query.get(int(obj_id))
+        if obj is not None:
+            return jsonify(obj.serialize())
+        else:
+            return_message = '%s does not exist' % (name)
 
     else:
-        peers = models.Peer.query.all()
-        return jsonify({'peers': [p.serialize() for p in peers]})
+        objs = model.query.all()
+        return jsonify({name: [o.serialize() for o in objs]})
 
-    return jsonify({'error': 'not ok'})
+    return jsonify({'error': return_message or 'unknown error'})

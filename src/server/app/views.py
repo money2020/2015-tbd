@@ -2,11 +2,12 @@ from app import app, db, models
 from flask import jsonify, request
 from util import crossdomain
 
+import random
+
 
 @app.route('/')
 def index():
     return 'Bunch! API'
-
 
 @app.route('/groups', methods=['GET', 'POST', 'OPTIONS'])
 @app.route('/groups/<group_id>', methods=['GET', 'OPTIONS'])
@@ -55,7 +56,15 @@ def cycle():
         for peer in group.peers:
             payments.append(models.Payment.collect(group, peer))
 
-        cashouts.append(models.Cashout.distribute(group, peer))
+        all_peers = set([p.id for p in group.peers])
+        cashed_peers = set(c.peer for c in models.Cashout.query.filter(models.Cashout.group == group.id).all())
+        candidate_peers = list(all_peers - cashed_peers)
+
+        if len(candidate_peers):
+            peer_id = random.choice(candidate_peers)
+            peer = models.Peer.query.get(peer_id)
+
+            cashouts.append(models.Cashout.distribute(group, peer))
 
     return jsonify({'payments': [p.serialize() for p in payments if p is not None],
                     'cashouts': [c.serialize() for c in cashouts if c is not None]})

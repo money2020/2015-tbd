@@ -23,7 +23,7 @@ def _crud(name, model, obj_id):
     return_message = None
 
     if request.method == 'POST':
-        obj = model(**request.get_json())
+        obj = model.fromdict(request.get_json())
 
         db.session.add(obj)
         db.session.commit()

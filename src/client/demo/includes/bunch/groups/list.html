@@ -1,0 +1,34 @@
+
+<div class="main-section">
+    <div class="main-section__content">
+
+        <div class="toolbar">
+            <span class="toolbar__label fs-title">My Bunches</span>
+            <div class="toolbar__right">
+                <lx-search-filter closed theme="light" model="state.filters.groups.label"></lx-search-filter>
+                <button class="btn btn--m btn--blue btn--flat" lx-ripple
+                ng-click="actions.groups.create()">
+                    Create Group
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <ul class="list">
+                <li style="cursor:pointer;" class="list-row list-row--has-separator"
+                    ng-repeat="group in state.groups | filter:state.filters.groups.label"
+                    ng-click="actions.groups.details(group)">
+                    <div class="list-row__primary">
+                        <img src="/images/placeholder/1-square.jpg" width="40" height="40" class="img-round">
+                    </div>
+                    <div class="list-row__content">
+                        <span>{{ group.label }}</span>
+                    </div>
+                    <div class="list-row__secondary">
+                        <i class="icon icon--s icon--grey icon--flat mdi mdi-chevron-right"></i>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

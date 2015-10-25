@@ -10,7 +10,7 @@
             <img src="/images/logo/lumx-white.png">
         </a>
     </h1>
-    
+
 
     <nav class="main-nav main-nav--lap-and-up">
         <ul>
@@ -18,6 +18,10 @@
             <li><a href="/css/mixins" class="main-nav__link" lx-ripple="white">CSS</a></li>
             <li><a href="/directives/dropdowns" class="main-nav__link" lx-ripple="white">Directives</a></li>
             <li><a href="/services/notifications" class="main-nav__link" lx-ripple="white">Services</a></li>
+            <li>|</li>
+            <li ng-repeat="(path, route) in bunchRoutes">
+                <a ng-href="{{ path }}" class="main-nav__link" lx-ripple="white">{{ route.title }}</a>
+            </li>
         </ul>
     </nav>
 

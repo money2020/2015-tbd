@@ -3,12 +3,52 @@
 /* global console */
 'use strict'; // jshint ignore:line
 
+
+// Lol free globals in my angular? We dont play by the rules
+var BUNCH_ROUTES = {
+    '/bunch/home': {
+        title: 'B/Home',
+        templateUrl: '/includes/bunch/home.html'
+    },
+    '/bunch/groups': {
+        title: 'B/groups',
+        templateUrl: '/includes/bunch/groups/list.html',
+        controller: 'BunchGroupList'
+    },
+    '/bunch/groups/create': {
+        title: 'B/groups/create',
+        templateUrl: '/includes/bunch/groups/create.html'
+    },
+    '/bunch/groups/:groupId': {
+        title: 'B/groups/details',
+        templateUrl: '/includes/bunch/groups/details.html',
+        controller: 'BunchGroupDetails'
+    },
+    '/bunch/login': {
+        title: 'B/login',
+        templateUrl: '/includes/bunch/login.html'
+    },
+    '/bunch/signup': {
+        title: 'B/signup',
+        templateUrl: '/includes/bunch/signup.html'
+    },
+    '/bunch/profile/cards': {
+        title: 'B/profile/cards',
+        templateUrl: '/includes/bunch/profile/cards-list.html'
+    },
+    '/bunch/profile/cards': {
+        title: 'B/profile/cards',
+        templateUrl: '/includes/bunch/profile/cards-list.html'
+    }
+}
+
 angular
     .module('lumx-demo', [
         'ngRoute',
         'lumx',
         'hljs',
-        'Services'
+        'Services',
+        'Bunch'
     ])
     .config(function($locationProvider, $routeProvider)
     {
@@ -110,10 +150,17 @@ angular
             })
             .when('/services/progress', {
                 templateUrl: '/includes/modules/progress/progress.html'
-            });
+            })
+            ;
+        Object.keys(BUNCH_ROUTES).forEach(function(key) {
+            $routeProvider.when(key, BUNCH_ROUTES[key]);
+        });
     })
-    .controller('AppController', function($http, $scope, $location, LxNotificationService, LxDialogService, LxProgressService, Sidebar)
+    .controller('AppController', function($http, $rootScope, $scope, $location, LxNotificationService, LxDialogService, LxProgressService, Sidebar)
     {
+        $rootScope.bunchRoutes = BUNCH_ROUTES;
+        console.log($rootScope.bunchRoutes);
+
         $scope.Sidebar = Sidebar;
 
         $scope.checkHome = function()
@@ -502,6 +549,159 @@ angular
         };
     });
 
+
+angular
+    .module('Bunch', [])
+    .controller('BunchGroupList', function($scope, $location, BunchAPI) {
+        $scope.state = {
+            loading: true
+        ,   filters: {}
+        ,   groups: []
+        };
+        $scope.actions = {
+            groups: {
+                create: function() {
+                    $location.path("/bunch/groups/create");
+                },
+                details: function(group) {
+                    $location.path(group.url);
+                }
+            }
+        };
+        BunchAPI.groups.list().then(function(groups) {
+            groups = groups.map(function(group) {
+                group.url = "/bunch/groups/" + group.id;
+                return group;
+            });
+            $scope.state.loading = false;
+            $scope.state.groups = groups;
+        });
+    })
+    .controller('BunchGroupDetails', function($scope, $routeParams, $location, LxNotificationService, DatetimeUtils, BunchAPI) {
+        $scope.state = {group: null, loading: true};
+
+        if (!$routeParams.groupId) {
+            LxNotificationService.error("Sorry, but that group could not be loaded.");
+            $location.path("/bunch/groups");
+        }
+
+        function processGroup(group) {
+            group.payout.timeLeft = DatetimeUtils.humanizeTimeBetween(
+                moment()
+            ,   group.payout.nextTimestamp
+            );
+            group.peers = group.peers.reduce(function(result, peer) {
+                if (!result.all) result.all = [];
+                if (!result.paid) result.paid = [];
+                if (!result.unpaid) result.unpaid = [];
+                var collection = peer.paid ? result.paid : result.unpaid;
+                collection.push(peer);
+                result.all.push(peer);
+                return result;
+            }, {});
+            return group;
+        }
+
+        BunchAPI.groups.get($routeParams.groupId)
+        .then(processGroup)
+        .then(function(group) {
+            $scope.state.group = group;
+            $scope.state.loading = false;
+        });
+    })
+    .service('DatetimeUtils', function() {
+        return {
+            humanizeTimeBetween: function(a, b) {
+                var duration = (moment(b).unix() - moment(a).unix()) * 1000;
+                return humanizeDuration(duration, { units: ["mo", "d", "h"], round:true });
+            }
+        };
+    })
+    .service('BunchAPI', function($q, $http) {
+        return {
+            users: {
+                create: function(user) {
+                },
+                get: function(userId) {
+                }
+            },
+            groups: {
+                create: function(group) {
+
+                },
+                get: function(groupId) {
+                    return $q.when({
+                        id: groupId
+                    ,   name: "Group Name (example)"
+                    ,   payout: {
+                            nextTimestamp: (new Date('2015-11-05')).toISOString()
+                        ,   amount:        1337
+                        }
+                    ,   vendor: {
+                            id: 1
+                        ,   image: "/images/placeholder/1-square.jpg"
+                        ,   name:  "Example Vendor"
+                        }
+                    ,   peers: [
+                            {
+                                id: 1
+                            ,   businessName: "Lucy's Shop"
+                            ,   ownerName:    "Lucy"
+                            ,   image: "/images/placeholder/1-square.jpg"
+                            ,   paid: false
+                            },
+                            {
+                                id: 2
+                            ,   businessName: "Amy's Shop"
+                            ,   ownerName:    "Amy"
+                            ,   image: "/images/placeholder/1-square.jpg"
+                            ,   paid: false
+                            },
+                            {
+                                id: 3
+                            ,   businessName: "Lucas's Shop"
+                            ,   ownerName:    "Lucas"
+                            ,   image: "/images/placeholder/1-square.jpg"
+                            ,   paid: false
+                            },
+                            {
+                                id: 4
+                            ,   businessName: "Cathy's Shop"
+                            ,   ownerName:    "Cathy"
+                            ,   image: "/images/placeholder/1-square.jpg"
+                            ,   paid: true
+                            },
+                            {
+                                id: 5
+                            ,   businessName: "Nick's Shop"
+                            ,   ownerName:    "Nick"
+                            ,   image: "/images/placeholder/1-square.jpg"
+                            ,   paid: false
+                            }
+                        ]
+                    });
+                },
+                list: function() {
+                    return $q.when([
+                        {
+                            id: "1",
+                            label: "Farming Equipment"
+                        },
+                        {
+                            id: "2",
+                            label: "Kitchen Equipment"
+                        },
+                        {
+                            id: "3",
+                            label: "School Equipment"
+                        }
+                    ]);
+                }
+            }
+        };
+    });
+
+
 angular
     .module('Services', [])
     .service('Sidebar', function()
@@ -521,3 +721,5 @@ angular
             toggleSidebar: toggleSidebar
         };
     });
+
+

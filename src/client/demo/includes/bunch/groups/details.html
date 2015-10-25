@@ -1,0 +1,55 @@
+
+<div class="main-section">
+    <div class="main-section__content">
+
+        <span class="fs-display-1 display-block mb+">{{ state.group.name }}</span>
+
+        <span class="fs-title display-block mb+">Next Payout In</span>
+
+        <div class="card bgc-deep-purple-500 tc-white-1 p+">
+            <span class="fs-display-1 display-block">{{ state.group.payout.timeLeft }}</span>
+        </div>
+
+        <style>
+        .peer {
+        }
+        .peer .owner-name {
+
+        }
+        </style>
+
+        <div class="card mt++">
+            <span class="fs-title display-block m+">Unpaid Peers</span>
+            <div class="divider divider--dark"></div>
+            <ul class="list">
+                <li class="list-row list-row--has-separator"
+                    ng-repeat="peer in state.group.peers.unpaid">
+                    <div class="list-row__primary">
+                        <img src="/images/placeholder/1-square.jpg" width="40" height="40" class="img-round">
+                    </div>
+                    <div class="list-row__content .peer">
+                        <span class="fs-body-2 display-block">{{ peer.businessName }}</span>
+                        <span class="fs-caption display-block">{{ peer.ownerName }}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card mt++">
+            <span class="fs-title display-block m+">Paid-out Peers</span>
+            <div class="divider divider--dark"></div>
+            <ul class="list">
+                <li class="list-row list-row--has-separator"
+                    ng-repeat="peer in state.group.peers.paid">
+                    <div class="list-row__primary">
+                        <img src="/images/placeholder/1-square.jpg" width="40" height="40" class="img-round">
+                    </div>
+                    <div class="list-row__content .peer">
+                        <span class="fs-body-2 display-block">{{ peer.businessName }}</span>
+                        <span class="fs-caption display-block">{{ peer.ownerName }}</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

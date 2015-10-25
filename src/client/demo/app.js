@@ -3,6 +3,17 @@
 /* global console */
 'use strict'; // jshint ignore:line
 
+var TEST_MODE = true;
+
+var humanizer = humanizeDuration.humanizer();
+humanizer.languages.shortEn = {
+  y: function(x) { return x + "y"; },
+  mo: function(x) { return x + "mo"},
+  d: function(x) { return x + "d"},
+  h: function(x) { return x + "h"}
+};
+
+var API_HOST = "http://b64cd8cf.ngrok.io"
 
 // Lol free globals in my angular? We dont play by the rules
 var BUNCH_ROUTES = {
@@ -17,7 +28,8 @@ var BUNCH_ROUTES = {
     },
     '/bunch/groups/create': {
         title: 'B/groups/create',
-        templateUrl: '/includes/bunch/groups/create.html'
+        templateUrl: '/includes/bunch/groups/create.html',
+        controller: 'BunchGroupCreate'
     },
     '/bunch/groups/:groupId': {
         title: 'B/groups/details',
@@ -26,19 +38,18 @@ var BUNCH_ROUTES = {
     },
     '/bunch/login': {
         title: 'B/login',
-        templateUrl: '/includes/bunch/login.html'
+        templateUrl: '/includes/bunch/login.html',
+        controller: 'BunchLogin'
     },
     '/bunch/signup': {
         title: 'B/signup',
-        templateUrl: '/includes/bunch/signup.html'
+        templateUrl: '/includes/bunch/signup.html',
+        controller: 'BunchSignup'
     },
     '/bunch/profile/cards': {
         title: 'B/profile/cards',
-        templateUrl: '/includes/bunch/profile/cards-list.html'
-    },
-    '/bunch/profile/cards': {
-        title: 'B/profile/cards',
-        templateUrl: '/includes/bunch/profile/cards-list.html'
+        templateUrl: '/includes/bunch/profile/cards-list.html',
+        controller: 'BunchProfileCards'
     }
 }
 
@@ -159,9 +170,8 @@ angular
     .controller('AppController', function($http, $rootScope, $scope, $location, LxNotificationService, LxDialogService, LxProgressService, Sidebar)
     {
         $rootScope.bunchRoutes = BUNCH_ROUTES;
-        console.log($rootScope.bunchRoutes);
-
         $scope.Sidebar = Sidebar;
+        $location.path('/bunch/groups');
 
         $scope.checkHome = function()
         {
@@ -577,7 +587,90 @@ angular
             $scope.state.groups = groups;
         });
     })
-    .controller('BunchGroupDetails', function($scope, $routeParams, $location, LxNotificationService, DatetimeUtils, BunchAPI) {
+    .controller('BunchGroupCreate', function($scope, $location, TestGroup, BunchAPI) {
+        $scope.state = {
+            params: {
+                groupName: 'New Group'
+            ,   amountPerInterval: null
+            ,   payoutPerInterval: null
+            ,   peers: []
+            }
+        ,   lastChanged: null
+        };
+
+        BunchAPI.users.list().then(function(users) {
+            $scope.state.users = users;
+        });
+
+        $scope.create = function() {
+            // var logo = "/images/placeholder/1-square.jpg";
+            // var id = Math.floor(Math.random() * 1000);
+            // var peers = $scope.state.params.peers.map(function(peer) {
+            //     return peer.id;
+            // });
+
+            var groupModel = {
+                name: $scope.state.params.groupName
+            ,   vendor: [1]
+            ,   payoutPerInterval: parseInt($scope.state.params.payoutPerInterval)
+            ,   amountPerInterval: parseInt($scope.state.params.amountPerInterval)
+            ,   peers: $scope.state.params.peers.map(function(peer) {
+                    return peer.id;
+                })
+            };
+
+            // var nextTimestamp = moment.utc().add($scope.state.params.peers.length, 'months');
+            // var group = new TestGroup(id, $scope.state.params.groupName, logo, nextTimestamp);
+            BunchAPI.groups.create(groupModel).then(function() {
+                $location.path("/bunch/groups");
+            });
+        };
+
+        $scope.change = function(key, value) {
+            $scope.state.lastChanged = key;
+            $scope.state.lastChangedValue = value;
+        }
+
+        function calculateAmountPerInterval(payoutPerInterval, peerCount, round) {
+            var value = payoutPerInterval / peerCount;
+            if (Number.isNaN(value)) return null;
+            var value = round? value.toFixed(0) : value.toFixed(2);
+            return parseFloat(value);
+        }
+
+        $scope.$watch('state.params.amountPerInterval', function(amountPerInterval) {
+            console.log("Amount changed:", amountPerInterval);
+            if (amountPerInterval == null) {
+                $scope.state.params.payoutPerInterval = null;
+                return;
+            }
+            $scope.state.lastPressed = 'amount';
+            var value = $scope.state.params.peers.length * amountPerInterval;
+            console.log("Amount:", value, $scope.state.params.peers.length, amountPerInterval);
+            if (Number.isNaN(value)) return;
+            if ($scope.state.lastChanged == 'payout') return;
+            $scope.state.params.payoutPerInterval = parseFloat(value.toFixed(2));
+        });
+
+        $scope.$watch('state.params.peers.length', function(peerCount) {
+            if (peerCount === null || peerCount === undefined) return;
+            var payoutPerInterval = $scope.state.params.payoutPerInterval;
+            $scope.state.params.amountPerInterval = calculateAmountPerInterval(payoutPerInterval, peerCount, true);
+        });
+
+        $scope.$watch('state.params.payoutPerInterval', function(payoutPerInterval) {
+            console.log("Payout changed:", payoutPerInterval);
+            if (payoutPerInterval === null) {
+                $scope.state.params.amountPerInterval = null;
+                return;
+            }
+            var peerCount = $scope.state.params.peers.length;
+            if ($scope.state.lastChanged == 'amount') return;
+            $scope.state.params.amountPerInterval = calculateAmountPerInterval(payoutPerInterval, peerCount);
+        });
+
+    })
+    .controller('BunchGroupDetails', function($q, $scope, $timeout, $routeParams, $location, Utils, LxNotificationService, DatetimeUtils, BunchAPI) {
         $scope.state = {group: null, loading: true};
 
         if (!$routeParams.groupId) {
@@ -585,118 +678,271 @@ angular
             $location.path("/bunch/groups");
         }
 
+        $scope.cycle = function() {
+            var SPEED = 33;
+            function runTimestampCountdown() {
+                var deferred = $q.defer();
+                var tickDown = function(callback) {
+                    var group = $scope.state.group.original;
+                    group.nextTimestamp = moment.utc(group.nextTimestamp).subtract(1, 'day');
+                    $scope.state.group = group = processGroup(group);
+                    var sum = Object.keys(group.timeLeft).reduce(function(sum, key) {
+                        if (key == "all") return sum;
+                        return sum + group.timeLeft[key];
+                    }, 0)
+                    if (sum != 0) {
+                        return $timeout(tickDown, SPEED);
+                    } else {
+                        return $timeout(function() { deferred.resolve(); }, 0);
+                    }
+                };
+                tickDown();
+                return deferred.promise;
+            }
+
+            runTimestampCountdown()
+            .then(function() {
+                BunchAPI.runCycle();
+            }).then(function() {
+                refresh();
+            });
+        }
+
         function processGroup(group) {
-            group.payout.timeLeft = DatetimeUtils.humanizeTimeBetween(
-                moment()
-            ,   group.payout.nextTimestamp
-            );
+            var now = moment();
+            var humanized = DatetimeUtils.humanizeTimeBetween(now, group.nextTimestamp, ["mo", "w", "d"])
+
+            group.original = Utils.copy(group);
+            var result = {months:0, weeks:0, days:0, hours:0, minutes:0};
+            console.log(humanized);
+            humanized.replace(/ /g, '').split(',').forEach(function(token) {
+                var type = token.replace(/\d+/g, '');
+                var number = parseInt(token.replace(/\D+/g, ''));
+                if (type == "months" || type == "month") {
+                    result.months = number;
+                }
+                else if (type == "weeks" || type == "week") {
+                    result.weeks = number;
+                }
+                else if (type == "days" || type == "day") {
+                    result.days = number;
+                }
+                else if (type == "hours" || type == "hour") {
+                    result.hours = number;
+                }
+            });
+            result.all = humanized;
+            group.timeLeft = result;
+
+            var peersWithCashouts = group.cashouts.map(function(cashout) {
+                return cashout.peer.id;
+            });
             group.peers = group.peers.reduce(function(result, peer) {
                 if (!result.all) result.all = [];
                 if (!result.paid) result.paid = [];
                 if (!result.unpaid) result.unpaid = [];
-                var collection = peer.paid ? result.paid : result.unpaid;
+                var collection = (peersWithCashouts.indexOf(peer.id) != -1 ) ? result.paid : result.unpaid;
                 collection.push(peer);
                 result.all.push(peer);
                 return result;
             }, {});
+
             return group;
         }
 
-        BunchAPI.groups.get($routeParams.groupId)
-        .then(processGroup)
-        .then(function(group) {
-            $scope.state.group = group;
-            $scope.state.loading = false;
-        });
+        function refresh() {
+            BunchAPI.groups.get($routeParams.groupId)
+            .then(processGroup)
+            .then(function(group) {
+                $scope.state.group = group;
+                $scope.state.loading = false;
+            });
+        }
+        refresh();
+
     })
     .service('DatetimeUtils', function() {
         return {
-            humanizeTimeBetween: function(a, b) {
+            humanizeTimeBetween: function(a, b, units) {
+                units = units? units : ["mo", "d", "h"];
                 var duration = (moment(b).unix() - moment(a).unix()) * 1000;
-                return humanizeDuration(duration, { units: ["mo", "d", "h"], round:true });
+                return humanizeDuration(duration, { units:units, round:true });
             }
         };
     })
-    .service('BunchAPI', function($q, $http) {
+    .factory('TestGroup', function() {
+        return function(groupId, groupName, logo, nextTimestamp) {
+            console.log({groupId:groupId, groupName:groupName});
+            var day   = Math.floor(Math.random() * 19) + 10 + 1;
+            var month = Math.floor(Math.random() * 4);
+
+            return {
+                id: groupId
+            ,   name: groupName
+            ,   amountPerInterval: 10
+            ,   payoutPerInterval: 50
+            ,   nextTimestamp: (nextTimestamp? nextTimestamp : (new Date('2016-03-' + day))).toISOString()
+            ,   vendor: {
+                    id: 1
+                ,   image: logo
+                ,   name:  "Example Vendor"
+                }
+            ,   cashouts: [
+                    {
+                        id: 900
+                    ,   peer: {
+                            id: 4
+                        ,   businessName: "Cathy's Shop"
+                        ,   ownerName:    "Cathy"
+                        ,   image: "/images/placeholder/3-square.jpg"
+                        }
+                    }
+                ]
+            ,   peers: [
+                    {
+                        id: 1
+                    ,   businessName: "Lucy's Shop"
+                    ,   ownerName:    "Lucy"
+                    ,   image: "/images/placeholder/3-square.jpg"
+                    },
+                    {
+                        id: 2
+                    ,   businessName: "Amy's Shop"
+                    ,   ownerName:    "Amy"
+                    ,   image: "/images/placeholder/3-square.jpg"
+                    },
+                    {
+                        id: 3
+                    ,   businessName: "Lucas's Shop"
+                    ,   ownerName:    "Lucas"
+                    ,   image: "/images/placeholder/3-square.jpg"
+                    },
+                    {
+                        id: 4
+                    ,   businessName: "Cathy's Shop"
+                    ,   ownerName:    "Cathy"
+                    ,   image: "/images/placeholder/3-square.jpg"
+                    },
+                    {
+                        id: 5
+                    ,   businessName: "Nick's Shop"
+                    ,   ownerName:    "Nick"
+                    ,   image: "/images/placeholder/3-square.jpg"
+                    }
+                ]
+            };
+        };
+    })
+    .service('Utils', function() {
+        return {
+            copy: function(x) {
+                return JSON.parse(JSON.stringify(x));
+            }
+        };
+    })
+    .service('BunchAPI', function($q, $http, Utils, TestGroup) {
+
+        var groups = [
+            [1, 'Farming Equipment', 'http://terrystractorrestoration.com/wp-content/uploads/2013/04/John-Deere-Logo.png'],
+            [2, 'Aviation Parts',    'http://air.today/wp-content/uploads/2015/07/Boeing-logo-001-150x124.jpg'],
+            [3, 'Fishing Boat Fund', 'http://www.nigeriajobs.pro/wp-content/themes/twentyfourteen/thumb-logo/piriou-group-jobs.png']
+        ].map(function(pair) {
+            var id   = pair[0];
+            var name = pair[1];
+            var logo = pair[2];
+            return new TestGroup(id, name, logo);
+        });
+
         return {
             users: {
                 create: function(user) {
                 },
                 get: function(userId) {
+                },
+                list: function() {
+                    if (!TEST_MODE) {
+                        return $http.get(API_HOST + "/peers").then(function(result) {
+                            return result.data.peer;
+                        });
+                    }
+                    return $q.when([
+                        {
+                            id: 1
+                        ,   businessName: "Lucy's Shop"
+                        ,   ownerName:    "Lucy"
+                        ,   email:        "lucy@example.com"
+                        ,   image: "/images/placeholder/3-square.jpg"
+                        },
+                        {
+                            id: 2
+                        ,   businessName: "Amy's Shop"
+                        ,   ownerName:    "Amy"
+                        ,   email:        "amy@example.com"
+                        ,   image: "/images/placeholder/3-square.jpg"
+                        },
+                        {
+                            id: 3
+                        ,   businessName: "Lucas's Shop"
+                        ,   ownerName:    "Lucas"
+                        ,   email:        "lucas@example.com"
+                        ,   image: "/images/placeholder/3-square.jpg"
+                        },
+                        {
+                            id: 4
+                        ,   businessName: "Cathy's Shop"
+                        ,   ownerName:    "Cathy"
+                        ,   email:        "cathy@example.com"
+                        ,   image: "/images/placeholder/3-square.jpg"
+                        },
+                        {
+                            id: 5
+                        ,   businessName: "Nick's Shop"
+                        ,   ownerName:    "Nick"
+                        ,   email:        "nick@example.com"
+                        ,   image: "/images/placeholder/3-square.jpg"
+                        }
+                    ]);
                 }
             },
             groups: {
                 create: function(group) {
-
+                    if (!TEST_MODE) {
+                        return $http.post(API_HOST + "/groups", group).then(function(result) {
+                            return result.data;
+                        });
+                    }
+                    group.id = Math.floor(Math.random() * 100);
+                    groups.push(group);
+                    return $q.when();
                 },
                 get: function(groupId) {
-                    return $q.when({
-                        id: groupId
-                    ,   name: "Group Name (example)"
-                    ,   payout: {
-                            nextTimestamp: (new Date('2015-11-05')).toISOString()
-                        ,   amount:        1337
+                    if (!TEST_MODE) {
+                        return $http.get(API_HOST + "/groups/" + groupId).then(function(result) {
+                            return result.data;
+                        });
+                    }
+                    var selected = null;
+                    groups.forEach(function(group) {
+                        if (group.id == groupId) {
+                            selected = group;
                         }
-                    ,   vendor: {
-                            id: 1
-                        ,   image: "/images/placeholder/1-square.jpg"
-                        ,   name:  "Example Vendor"
-                        }
-                    ,   peers: [
-                            {
-                                id: 1
-                            ,   businessName: "Lucy's Shop"
-                            ,   ownerName:    "Lucy"
-                            ,   image: "/images/placeholder/1-square.jpg"
-                            ,   paid: false
-                            },
-                            {
-                                id: 2
-                            ,   businessName: "Amy's Shop"
-                            ,   ownerName:    "Amy"
-                            ,   image: "/images/placeholder/1-square.jpg"
-                            ,   paid: false
-                            },
-                            {
-                                id: 3
-                            ,   businessName: "Lucas's Shop"
-                            ,   ownerName:    "Lucas"
-                            ,   image: "/images/placeholder/1-square.jpg"
-                            ,   paid: false
-                            },
-                            {
-                                id: 4
-                            ,   businessName: "Cathy's Shop"
-                            ,   ownerName:    "Cathy"
-                            ,   image: "/images/placeholder/1-square.jpg"
-                            ,   paid: true
-                            },
-                            {
-                                id: 5
-                            ,   businessName: "Nick's Shop"
-                            ,   ownerName:    "Nick"
-                            ,   image: "/images/placeholder/1-square.jpg"
-                            ,   paid: false
-                            }
-                        ]
                     });
+                    return $q.when(selected? Utils.copy(selected) : null);
                 },
                 list: function() {
-                    return $q.when([
-                        {
-                            id: "1",
-                            label: "Farming Equipment"
-                        },
-                        {
-                            id: "2",
-                            label: "Kitchen Equipment"
-                        },
-                        {
-                            id: "3",
-                            label: "School Equipment"
-                        }
-                    ]);
+                    if (!TEST_MODE) {
+                        return $http.get(API_HOST + "/groups").then(function(result) {
+                            return result.data.group;
+                        });
+                    }
+                    return $q.when(Utils.copy(groups));
                 }
+            },
+            runCycle: function() {
+                if (!TEST_MODE) {
+                    return $http.get(API_HOST + "/cycle");
+                }
+                return $q.when();
             }
         };
     });

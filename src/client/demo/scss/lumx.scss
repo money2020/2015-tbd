@@ -19,3 +19,29 @@
 @import "objects/objects.colors";
 
 @import "components/components.hljs";
+
+.timeleft {
+    @include display(flex);
+    @include flex-direction(row);
+    @include flex-wrap(no-wrap);
+    @include justify-content(center);
+    @include align-content(center);
+}
+
+.timeleft-card {
+    @include flex(1 1 auto);
+    @include align-self(stretch);
+    @include justify-content(center);
+    @include align-content(center);
+    height: 100px;
+    text-align: center;
+    padding-top: 20px;
+
+    .label {
+        font-weight: 300;
+    }
+
+    & > * {
+        min-width: 60px;
+    }
+}

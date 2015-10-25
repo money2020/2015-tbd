@@ -29,6 +29,13 @@ def vendors(vendor_id=None):
     return _crud('vendor', models.Vendor, vendor_id)
 
 
+@app.route('/payments', methods=['GET', 'POST'])
+@app.route('/payments/<payment_id>', methods=['GET'])
+@crossdomain(origin='*')
+def payments(payment_id=None):
+    return _crud('payment', models.Payment, payment_id)
+
+
 def _crud(name, model, obj_id):
     return_message = None
 

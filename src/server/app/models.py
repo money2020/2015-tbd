@@ -1,5 +1,7 @@
 from app import db
 
+import datetime
+
 
 peers_groups = db.Table('peers_to_groups',
     db.Column('peer_id', db.Integer, db.ForeignKey('peers.id')),
@@ -22,9 +24,21 @@ class SuperModel:
         if 'peers' in df:
             df['peers'] = [x for x in Peer.query.filter(Peer.id.in_(df['peers'])).all()]
 
-        # UGH...
+        # ugh...
+        if 'peer' in df:
+            df['peer'] = Peer.query.get(df['peer']).id
+
+        # ugh...
+        if 'group' in df:
+            df['group'] = Peer.query.get(df['group']).id
+
+        # ugh...
         if 'vendor' in df:
             df['vendor'] = [v for v in Vendor.query.filter(Vendor.id.in_(df['vendor'])).all()]
+
+        # ugh...
+        if 'timestamp' in df:
+            df['timestamp'] = datetime.datetime.fromtimestamp(int(df['timestamp']))
 
         return cls(**df)
 
@@ -37,7 +51,8 @@ class Peer(db.Model, SuperModel):
     business_name = db.Column(db.String(64))
     owner_name = db.Column(db.String(64))
     image = db.Column(db.String(64))
-    paid = db.Column(db.Boolean)
+    paid = db.Column(db.Boolean) # DEPRECATED
+    payments = db.relationship('Payment', backref="peer_orig")
 
     def serialize(self):
         return {
@@ -68,7 +83,7 @@ class Vendor(db.Model, SuperModel):
         }
 
     def __repr__(self):
-        return '<Vendor "%r">' % (self.id)
+        return '<Vendor "%r">' % (self.name)
 
 
 class Group(db.Model, SuperModel):
@@ -79,6 +94,7 @@ class Group(db.Model, SuperModel):
     name = db.Column(db.String(64))
     peers = db.relationship('Peer', secondary=peers_groups)
     vendor = db.relationship('Vendor', secondary=vendors_groups)
+    payments = db.relationship('Payment', backref="group_orig")
 
     def serialize(self):
         return {
@@ -90,3 +106,26 @@ class Group(db.Model, SuperModel):
 
     def __repr__(self):
         return '<Group "%r">' % (self.name)
+
+
+class Payment(db.Model, SuperModel):
+
+    __tablename__ = 'payments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime)
+    peer = db.Column(db.Integer, db.ForeignKey('peers.id'))
+    group = db.Column(db.Integer, db.ForeignKey('groups.id'))
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'amount': self.amount,
+            'timestamp': int(self.timestamp.strftime("%s")),
+            'peer': Peer.query.get(self.peer).serialize(),
+            'group': Group.query.get(self.group).serialize()
+        }
+
+    def __repr__(self):
+        return '<Payment #%r>' % (self.id)

@@ -1,6 +1,7 @@
 from app import app, db, models
-
+from util import crossdomain
 from flask import jsonify, request
+
 
 @app.route('/')
 def index():
@@ -9,18 +10,21 @@ def index():
 
 @app.route('/groups', methods=['GET', 'POST'])
 @app.route('/groups/<group_id>', methods=['GET'])
+@crossdomain(origin='*')
 def groups(group_id=None):
     return _crud('group', models.Group, group_id)
 
 
 @app.route('/peers', methods=['GET', 'POST'])
 @app.route('/peers/<peer_id>', methods=['GET'])
+@crossdomain(origin='*')
 def peers(peer_id=None):
     return _crud('peer', models.Peer, peer_id)
 
 
 @app.route('/vendors', methods=['GET', 'POST'])
 @app.route('/vendors/<vendor_id>', methods=['GET'])
+@crossdomain(origin='*')
 def vendors(vendor_id=None):
     return _crud('vendor', models.Vendor, vendor_id)
 

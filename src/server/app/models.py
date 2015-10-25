@@ -83,6 +83,7 @@ class Vendor(db.Model, SuperModel):
 
     id = db.Column(db.Integer, primary_key=True)
     image = db.Column(db.String(256))
+    logoImage = db.Column(db.String(256))
     name = db.Column(db.String(64))
     securenetId = db.Column(db.String(64))
     securenetKey = db.Column(db.String(64))
@@ -91,7 +92,8 @@ class Vendor(db.Model, SuperModel):
         serialize = {
             'id': self.id,
             'name': self.name,
-            'image': self.image
+            'image': self.image,
+            'logoImage': self.logoImage
         }
 
         if deep_link > 0:

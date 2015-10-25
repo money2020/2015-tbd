@@ -41,6 +41,10 @@ class SuperModel:
         if 'timestamp' in df:
             df['timestamp'] = datetime.datetime.fromtimestamp(int(df['timestamp']))
 
+        # ugh...
+        if 'timestamp' in df:
+            df['timestamp'] = datetime.datetime.fromtimestamp(int(df['timestamp']))
+
         return cls(**df)
 
 
@@ -118,7 +122,7 @@ class Group(db.Model, SuperModel):
             'name': self.name,
             'amountPerInterval': self.amountPerInterval,
             'payoutPerInterval': self.payoutPerInterval,
-            'nextTimestamp': self._next_cashout().strftime("%s")
+            'nextTimestamp': self._next_cashout().isoformat()
         }
 
         if deep_link > 0:
@@ -130,7 +134,13 @@ class Group(db.Model, SuperModel):
         return serialize
 
     def _next_cashout(self):
-        return self.cashouts.order_by('-id').first().timestamp + relativedelta(months=1)
+        base_time = datetime.datetime.now()
+
+        cashout = self.cashouts.order_by('-id').first()
+        if cashout:
+            base_time = cashout.timestamp
+
+        return base_time + relativedelta(months=1)
 
     def __repr__(self):
         return '<Group "%r">' % (self.name)
@@ -175,7 +185,7 @@ class Payment(db.Model, SuperModel):
         serialize = {
             'id': self.id,
             'amount': self.amount,
-            'timestamp': int(self.timestamp.strftime("%s"))
+            'timestamp': self.timestamp.isoformat()
         }
 
         if deep_link > 0:
@@ -219,7 +229,7 @@ class Cashout(db.Model, SuperModel):
         serialize = {
             'id': self.id,
             'amount': self.amount,
-            'timestamp': int(self.timestamp.strftime("%s"))
+            'timestamp': self.timestamp.isoformat()
         }
 
         if deep_link > 0:

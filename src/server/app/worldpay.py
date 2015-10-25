@@ -1,4 +1,5 @@
 import requests
+import thread
 
 class WorldPay:
 
@@ -12,25 +13,30 @@ class WorldPay:
 
     def collect_payment(self, data, auth):
 
-        body = '''{
-            amount: %0.2f,
-            check: {
-                firstName: "%s",
-                lastName: "%s",
-                routingNumber: 222371863,
-                accountNumber: 123456
-            },
-            developerApplication: {
-                developerId: 12345678,
-                version: '1.2'
-            }
-        }''' % (data['amount'], data['firstName'], data['lastName'])
+        def threaded_collect_payment(self, data, auth):
+            body = '''{
+                amount: %0.2f,
+                check: {
+                    firstName: "%s",
+                    lastName: "%s",
+                    routingNumber: 222371863,
+                    accountNumber: 123456
+                },
+                developerApplication: {
+                    developerId: 12345678,
+                    version: '1.2'
+                }
+            }''' % (data['amount'], data['firstName'], data['lastName'])
 
-        print body
+            print body
 
-        r = self._request('/Payments/Charge', body=body, auth=auth)
+            r = self._request('/Payments/Charge', body=body, auth=auth)
 
-        print r.content
+            print r.content
+
+        thread.start_new_thread(threaded_collect_payment, (self, data, auth))
+
+        return True
 
 
     def _request(self, endpoint, body, auth=None):

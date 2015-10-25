@@ -8,42 +8,42 @@ def index():
     return 'Bunch! API'
 
 
-@app.route('/groups', methods=['GET', 'POST'])
-@app.route('/groups/<group_id>', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/groups', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/groups/<group_id>', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*', headers=['Content-Type'])
 def groups(group_id=None):
     return _crud('group', models.Group, group_id)
 
 
-@app.route('/peers', methods=['GET', 'POST'])
-@app.route('/peers/<peer_id>', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/peers', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/peers/<peer_id>', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*', headers=['Content-Type'])
 def peers(peer_id=None):
     return _crud('peer', models.Peer, peer_id)
 
 
-@app.route('/vendors', methods=['GET', 'POST'])
-@app.route('/vendors/<vendor_id>', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/vendors', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/vendors/<vendor_id>', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*', headers=['Content-Type'])
 def vendors(vendor_id=None):
     return _crud('vendor', models.Vendor, vendor_id)
 
 
-@app.route('/payments', methods=['GET', 'POST'])
-@app.route('/payments/<payment_id>', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/payments', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/payments/<payment_id>', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*', headers=['Content-Type'])
 def payments(payment_id=None):
     return _crud('payment', models.Payment, payment_id)
 
 
-@app.route('/cashouts', methods=['GET', 'POST'])
-@app.route('/cashouts/<cashout_id>', methods=['GET'])
-@crossdomain(origin='*')
+@app.route('/cashouts', methods=['GET', 'POST', 'OPTIONS'])
+@app.route('/cashouts/<cashout_id>', methods=['GET', 'OPTIONS'])
+@crossdomain(origin='*', headers=['Content-Type'])
 def cashouts(cashout_id=None):
     return _crud('cashout', models.Cashout, cashout_id)
 
 
-@app.route('/cycle', methods=['GET'])
+@app.route('/cycle', methods=['GET', 'OPTIONS'])
 @crossdomain(origin='*')
 def cycle():
     ''' Simulates a "cycle" in the system, collecting money from all group

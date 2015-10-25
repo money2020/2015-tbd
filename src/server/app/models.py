@@ -48,8 +48,8 @@ class Peer(db.Model, SuperModel):
     __tablename__ = 'peers'
 
     id = db.Column(db.Integer, primary_key=True)
-    business_name = db.Column(db.String(64))
-    owner_name = db.Column(db.String(64))
+    businessName = db.Column(db.String(64))
+    ownerName = db.Column(db.String(64))
     image = db.Column(db.String(64))
     paid = db.Column(db.Boolean) # DEPRECATED
     payments = db.relationship('Payment', backref="peer_orig")
@@ -57,8 +57,8 @@ class Peer(db.Model, SuperModel):
     def serialize(self):
         return {
             'id': self.id,
-            'businessName': self.business_name,
-            'ownerName': self.owner_name,
+            'businessName': self.businessName,
+            'ownerName': self.ownerName,
             'image': self.image,
             'paid': self.paid
         }
@@ -92,6 +92,8 @@ class Group(db.Model, SuperModel):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
+    amountPerInterval = db.Column(db.Integer)
+    payoutPerInterval = db.Column(db.Integer)
     peers = db.relationship('Peer', secondary=peers_groups)
     vendor = db.relationship('Vendor', secondary=vendors_groups)
     payments = db.relationship('Payment', backref="group_orig")
@@ -100,6 +102,8 @@ class Group(db.Model, SuperModel):
         return {
             'id': self.id,
             'name': self.name,
+            'amountPerInterval': self.amountPerInterval,
+            'payoutPerInterval': self.payoutPerInterval,
             'peers': [p.serialize() for p in self.peers],
             'vendor': [v.serialize() for v in self.vendor]
         }

@@ -36,6 +36,14 @@ def payments(payment_id=None):
     return _crud('payment', models.Payment, payment_id)
 
 
+@app.route('/cycle', methods=['GET'])
+@crossdomain(origin='*')
+def cycle():
+    ''' Simulates a "cycle" in the system, collecting money from all group
+        peers, and distributing to one peer per group. '''
+    pass
+
+
 def _crud(name, model, obj_id):
     return_message = None
 

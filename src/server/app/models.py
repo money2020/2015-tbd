@@ -1,4 +1,4 @@
-from app import db
+from app import db, worldpay
 
 import datetime
 
@@ -52,16 +52,23 @@ class Peer(db.Model, SuperModel):
     ownerName = db.Column(db.String(64))
     image = db.Column(db.String(64))
     paid = db.Column(db.Boolean) # DEPRECATED
+    groups = db.relationship('Group', secondary=peers_groups)
     payments = db.relationship('Payment', backref="peer_orig")
+    cashouts = db.relationship('Cashout', backref="peer_orig")
 
-    def serialize(self):
-        return {
+    def serialize(self, deep_link=2):
+        serialize = {
             'id': self.id,
             'businessName': self.businessName,
             'ownerName': self.ownerName,
             'image': self.image,
             'paid': self.paid
         }
+
+        if deep_link > 0:
+            serialize['groups'] = [g.serialize(deep_link - 1) for g in self.groups]
+
+        return serialize
 
     def __repr__(self):
         return '<Peer "%r">' % (self.id)
@@ -75,12 +82,17 @@ class Vendor(db.Model, SuperModel):
     image = db.Column(db.String(64))
     name = db.Column(db.String(64))
 
-    def serialize(self):
-        return {
+    def serialize(self, deep_link=2):
+        serialize = {
             'id': self.id,
             'name': self.name,
             'image': self.image
         }
+
+        if deep_link > 0:
+            pass
+
+        return serialize
 
     def __repr__(self):
         return '<Vendor "%r">' % (self.name)
@@ -97,16 +109,23 @@ class Group(db.Model, SuperModel):
     peers = db.relationship('Peer', secondary=peers_groups)
     vendor = db.relationship('Vendor', secondary=vendors_groups)
     payments = db.relationship('Payment', backref="group_orig")
+    cashouts = db.relationship('Cashout', backref="group_orig")
 
-    def serialize(self):
-        return {
+    def serialize(self, deep_link=2):
+        serialize =  {
             'id': self.id,
             'name': self.name,
             'amountPerInterval': self.amountPerInterval,
             'payoutPerInterval': self.payoutPerInterval,
-            'peers': [p.serialize() for p in self.peers],
-            'vendor': [v.serialize() for v in self.vendor]
         }
+
+        if deep_link > 0:
+            serialize['peers'] = [p.serialize(deep_link - 1) for p in self.peers]
+            serialize['vendor'] = [v.serialize(deep_link - 1) for v in self.vendor]
+            serialize['payments'] = [p.serialize(deep_link - 1) for p in self.payments]
+            serialize['cashouts'] = [c.serialize(deep_link - 1) for c in self.cashouts]
+
+        return serialize
 
     def __repr__(self):
         return '<Group "%r">' % (self.name)
@@ -122,14 +141,84 @@ class Payment(db.Model, SuperModel):
     peer = db.Column(db.Integer, db.ForeignKey('peers.id'))
     group = db.Column(db.Integer, db.ForeignKey('groups.id'))
 
-    def serialize(self):
-        return {
-            'id': self.id,
-            'amount': self.amount,
-            'timestamp': int(self.timestamp.strftime("%s")),
-            'peer': Peer.query.get(self.peer).serialize(),
-            'group': Group.query.get(self.group).serialize()
+    @classmethod
+    def collect(cls, group, peer):
+        payment = {
+            'amount': group.amountPerInterval,
+            'timestamp': datetime.datetime.now(),
+            'peer': peer.id,
+            'group': group.id
         }
 
+        wp_request = {}
+        
+        if worldpay.collect_payment(wp_request):
+            payment = cls(**payment)
+
+            db.session.add(payment)
+            db.session.commit()
+
+            return payment
+
+    def serialize(self, deep_link=2):
+        serialize = {
+            'id': self.id,
+            'amount': self.amount,
+            'timestamp': int(self.timestamp.strftime("%s"))
+        }
+
+        if deep_link > 0:
+            serialize['peer'] = Peer.query.get(self.peer).serialize(deep_link - 1)
+            serialize['group'] = Group.query.get(self.group).serialize(deep_link - 1)
+
+        return serialize
+
+
     def __repr__(self):
-        return '<Payment #%r>' % (self.id)
+        return '<Payment %r>' % (self.id)
+
+
+class Cashout(db.Model, SuperModel):
+
+    __tablename__ = 'cashouts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Integer)
+    timestamp = db.Column(db.DateTime)
+    peer = db.Column(db.Integer, db.ForeignKey('peers.id'))
+    group = db.Column(db.Integer, db.ForeignKey('groups.id'))
+
+    @classmethod
+    def distribute(cls, group, peer):
+        cashout = {
+            'amount': group.payoutPerInterval,
+            'timestamp': datetime.datetime.now(),
+            'peer': peer.id,
+            'group': group.id
+        }
+
+        wp_request = {}
+
+        if worldpay.distribute_payment(wp_request):
+            cashout = cls(**cashout)
+
+            db.session.add(cashout)
+            db.session.commit()
+
+            return cashout
+
+    def serialize(self, deep_link=2):
+        serialize = {
+            'id': self.id,
+            'amount': self.amount,
+            'timestamp': int(self.timestamp.strftime("%s"))
+        }
+
+        if deep_link > 0:
+            serialize['peer'] = Peer.query.get(self.peer).serialize(deep_link - 1)
+            serialize['group'] = Group.query.get(self.group).serialize(deep_link - 1)
+
+        return serialize
+
+    def __repr__(self):
+        return '<Cashout %r>' % (self.id)

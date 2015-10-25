@@ -9,6 +9,15 @@ class WorldPay:
         self.securenet_id = securenet_id
         self.secure_key = secure_key
 
+
+    def collect_payment(self, data):
+        return True
+
+
+    def distribute_payment(self, data):
+        return True
+
+
     def _request(self, endpoint, body):
         url = self.base_url + endpoint
         r = requests.post(url,

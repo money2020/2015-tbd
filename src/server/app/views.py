@@ -1,11 +1,11 @@
 from app import app, db, models
-from util import crossdomain
 from flask import jsonify, request
+from util import crossdomain
 
 
 @app.route('/')
 def index():
-    return 'ok'
+    return 'Bunch! API'
 
 
 @app.route('/groups', methods=['GET', 'POST'])
@@ -36,13 +36,29 @@ def payments(payment_id=None):
     return _crud('payment', models.Payment, payment_id)
 
 
+@app.route('/cashouts', methods=['GET', 'POST'])
+@app.route('/cashouts/<cashout_id>', methods=['GET'])
+@crossdomain(origin='*')
+def cashouts(cashout_id=None):
+    return _crud('cashout', models.Cashout, cashout_id)
+
+
 @app.route('/cycle', methods=['GET'])
 @crossdomain(origin='*')
 def cycle():
     ''' Simulates a "cycle" in the system, collecting money from all group
         peers, and distributing to one peer per group. '''
-    pass
 
+    payments = []
+    cashouts = []
+    for group in models.Group.query.all():
+        for peer in group.peers:
+            payments.append(models.Payment.collect(group, peer))
+
+        cashouts.append(models.Cashout.distribute(group, peer))
+
+    return jsonify({'payments': [p.serialize() for p in payments],
+                    'cashouts': [c.serialize() for c in cashouts]})
 
 def _crud(name, model, obj_id):
     return_message = None

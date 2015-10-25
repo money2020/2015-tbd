@@ -35,23 +35,11 @@
             All participants have been funded!
         </span>
 
-        <span class="fs-title display-block mb+">
-
-        </span>
-
-        <style>
-        .peer {
-        }
-        .peer .owner-name {
-        }
-        </style>
-
         <div class="card mt++" ng-if="state.group.peers.unpaid.length > 0">
             <span class="fs-title display-block m+">Unpaid Peers</span>
             <div class="divider divider--dark"></div>
             <ul class="list">
                 <li class="list-row list-row--has-separator"
-                    style="background-image:url('http://il2.picdn.net/shutterstock/videos/3597359/thumb/4.jpg')"
                     ng-repeat="peer in state.group.peers.unpaid">
                     <div class="list-row__primary">
                         <img src="/images/placeholder/1-square.jpg" width="40" height="40" class="img-round">

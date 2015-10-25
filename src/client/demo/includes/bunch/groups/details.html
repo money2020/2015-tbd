@@ -3,14 +3,14 @@
     <div class="main-section__content">
 
         <div>
-            <span style="display: inline-block; position:relative; top:6px" class="list-row__primary">
+<!--             <span style="display: inline-block; position:relative; top:6px" class="list-row__primary">
                 <img ng-src="{{ state.group.image }}" width="40" height="40" class="img-round">
-            </span>
-            <span style="display: inline-block" class="fs-display-1 display-block mb+">{{ state.group.name }}</span>
+            </span> -->
+            <span style="display: block; text-align: center" class="fs-display-1 display-block mb+">{{ state.group.name }}</span>
         </div>
 
         <div ng-if="state.group.peers.unpaid.length > 0">
-            <span class="fs-title display-block mb+">Next Payout In:</span>
+            <span class="fs-title display-block mb+" style="text-align: center">Time Until Next Payout</span>
             <div class="timeleft">
                 <div class="card m+ timeleft-card timeleft-months">
                     <span class="number fs-display-1 display-block">{{ state.group.timeLeft.months }}</span>
@@ -30,9 +30,13 @@
             </div>
         </div>
 
-        <span ng-if="state.group.peers.unpaid.length == 0" class="fs-title display-block mb+">
+        <span ng-if="state.group.peers.unpaid.length == 0" style="color:#49B476; text-align: center" class="fs-title display-block mb+">
             All participants have been funded!
         </span>
+
+        <div class="card" style="height: 50px; max-height:50px; text-align: center; margin: 10px; padding: 10px 0;">
+            <img style="height: 100%; display: inline-block;" ng-src="{{ state.group.vendor[0].logoImage }}">
+        </div>
 
         <div class="card mt++" ng-if="state.group.peers.unpaid.length > 0">
             <span class="fs-title display-block m+">Unfunded Peers</span>
@@ -41,7 +45,7 @@
                 <li class="list-row list-row--has-separator"
                     ng-repeat="peer in state.group.peers.unpaid">
                     <div class="list-row__primary">
-                        <img src="/images/placeholder/1-square.jpg" width="40" height="40" class="img-round">
+                        <img ng-src="{{ peer.image }}" width="40" height="40" class="img-round">
                     </div>
                     <div class="list-row__content .peer">
                         <span class="fs-body-2 display-block">{{ peer.businessName }}</span>
@@ -58,7 +62,7 @@
                 <li class="list-row list-row--has-separator"
                     ng-repeat="peer in state.group.peers.paid">
                     <div class="list-row__primary">
-                        <img src="/images/placeholder/1-square.jpg" width="40" height="40" class="img-round">
+                        <img ng-src="{{ peer.image }}" width="40" height="40" class="img-round">
                     </div>
                     <div class="list-row__content .peer">
                         <span class="fs-body-2 display-block">{{ peer.businessName }}</span>

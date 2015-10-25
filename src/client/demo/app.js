@@ -178,6 +178,10 @@ angular
             return $location.path() === '/';
         };
 
+        $scope.isOnGroupDetails = function() {
+            return /\/bunch\/groups\/\d+/.test($location.path());
+        };
+
         $scope.repo = {
             lastCommit: {
                 date: undefined,
@@ -687,7 +691,7 @@ angular
         });
 
     })
-    .controller('BunchGroupDetails', function($q, $scope, $timeout, $routeParams, $location, Utils, LxNotificationService, DatetimeUtils, BunchAPI) {
+    .controller('BunchGroupDetails', function($q, $rootScope, $scope, $timeout, $routeParams, $location, Utils, LxNotificationService, DatetimeUtils, BunchAPI) {
         $scope.state = {group: null, loading: true};
 
         if (!$routeParams.groupId) {
@@ -695,7 +699,7 @@ angular
             $location.path("/bunch/groups");
         }
 
-        $scope.cycle = function() {
+        $rootScope.cycle = function() {
             var SPEED = 33;
             function runTimestampCountdown() {
                 var deferred = $q.defer();
@@ -779,7 +783,6 @@ angular
                 try {
                     $scope.$apply()
                 } catch(error) {
-                    console.error("lol")
                 }
             });
         }

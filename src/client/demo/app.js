@@ -978,6 +978,7 @@ angular
                 list: function() {
                     if (!TEST_MODE) {
                         return $http.get(API_HOST + "/groups").then(function(result) {
+                            console.log(result.data.group);
                             return result.data.group;
                         });
                     }
